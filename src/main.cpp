@@ -3,22 +3,21 @@
 #include <fstream>
 #include <ncurses.h>
 
-#include "io/utils.h"
+#include "io/io_utils.h"
+#include "util/utils.h"
+#include "buffer/buffer.h"
 
-int main() {
+int main(int argc, char* argv[]) {
+
+    parse_init(argc, argv);
 
     initscr();              // Start curses mode
     noecho();
     keypad(stdscr, TRUE);
 
-    
-    std::string tmp;
-    std::fstream ifile("data/file.txt", std::ios::binary|std::ios::in|std::ios::out);
-    
-    std::string buffer((std::istreambuf_iterator<char>(ifile)),
-                       std::istreambuf_iterator<char>());
+    create_buf(PATH);
 
-    printw(buffer.c_str());
+    printw(BUF.c_str());
 
     int c;
     int x = 0;
@@ -29,7 +28,7 @@ int main() {
         std::cout << "val =" << c << std::endl;
         switch (c) {
             case BACKSPACE:
-                delete_char_back(buffer);
+                delete_char_back(BUF);
                 delch();
                 break;
             case KEY_LEFT:
@@ -45,26 +44,19 @@ int main() {
                 y++;
                 break;
             default:
-                buffer.append({char(c)});
+                BUF.append({char(c)});
                 break;
         }
 
-        adjust_x(x, buffer, y);
-        adjust_y(y, buffer);
+        adjust_x(x, BUF, y);
+        adjust_y(y, BUF);
 
         clear();
-        printw(buffer.c_str());
+        printw(BUF.c_str());
         move(y, x);
         refresh();
 
     }
 
     endwin();
-
-    ifile.close(); // close input file
-
-    // write out buffer
-    std::ofstream ofile("data/file.txt", std::ios::out | std::ios::trunc | std::ios::binary);
-    ofile.write(buffer.c_str(), buffer.size());
-    ofile.close();
 }
