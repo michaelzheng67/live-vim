@@ -4,8 +4,10 @@
 #include <string>
 
 extern std::string PATH;
+extern char *SERVER_IP;
+extern bool IS_SERVER;
 
-void parse_init(int argc, char* argv[]);
-
+// parses user input and stores them in global variables
+bool parse_init(int argc, char *argv[]);
 
 #endif

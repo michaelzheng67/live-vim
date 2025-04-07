@@ -1,7 +1,17 @@
 # Compiler and flags
 CXX = g++
-CXXFLAGS = -Wall -std=c++17
-LDFLAGS = -lncurses
+CXXFLAGS = -Wall -std=c++17 -O3
+
+# uncomment for debug mode
+# CXXFLAGS += -DDEBUG
+
+# Boost flags
+BOOST_INCLUDE = -I/opt/homebrew/include
+BOOST_LDFLAGS = -L/opt/homebrew/lib
+BOOST_LIBS = -lboost_system -lboost_thread
+
+# Linker flags
+LDFLAGS = -lncurses $(BOOST_LIBS) $(BOOST_LDFLAGS)
 
 # Directories
 SRC_DIR = src
@@ -27,7 +37,7 @@ $(TARGET): $(OBJS)
 # Compile each .cpp into corresponding .o file under build/obj
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
 	@mkdir -p $(dir $@)
-	$(CXX) $(CXXFLAGS) -c $< -o $@
+	$(CXX) $(CXXFLAGS) $(BOOST_INCLUDE) -c $< -o $@
 
 # Clean target
 clean:
