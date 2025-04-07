@@ -10,39 +10,17 @@ class buffer {
   std::vector<std::string> data;
 
 public:
-  void initialize(std::string input) {
-    std::stringstream ss{input};
-    std::string tmp;
-    while (getline(ss, tmp)) {
-      data.emplace_back(tmp);
-    }
-  }
+  void initialize(std::string input);
 
-  std::string get_str_repr() const {
-    std::string res;
-    unsigned int n = data.size();
-    for (int i = 0; i < n; i++) {
-      res += data[i];
-      if (i < n - 1) {
-        res += '\n';
-      }
-    }
-    return res;
-  }
+  std::string get_str_repr() const;
 
-  void insert_at(int x, int y, char c) {
-    std::string *str = &data[y];
-    str->insert(x, 1, c);
-  }
+  void insert_at(int x, int y, char c);
 
-  void delete_at(int x, int y) {
-    std::string *str = &data[y];
-    str->erase(x, 1);
-  }
+  void delete_at(int x, int y);
 
-  const std::string &get_line_at(int y) const { return data[y]; }
+  const std::string &get_line_at(int y) const;
 
-  int get_num_lines() const { return data.size(); }
+  int get_num_lines() const;
 };
 
 extern buffer BUF;
