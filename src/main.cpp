@@ -201,17 +201,19 @@ void terminal_gui_loop(message_queue &send_q, message_queue &receive_q) {
       clear();
       printw(BUF.get_str_repr().c_str());
 
+      int rows, cols;
+      getmaxyx(stdscr, rows, cols);
+
       if (modes[INSERT_MODE]) {
-        int rows, cols;
-        getmaxyx(stdscr, rows, cols);
         mvprintw(rows - 1, 0, "-- Insert --");
       }
 
       if (!mode_toggled(modes)) {
-        int rows, cols;
-        getmaxyx(stdscr, rows, cols);
         mvprintw(rows - 1, 0, queued_cmd.c_str());
       }
+
+      std::string coordinates = std::to_string(y) + "," + std::to_string(x);
+      mvprintw(rows - 1, cols - coordinates.size(), "%s", coordinates.c_str());
 
       move(y, x);
       refresh();

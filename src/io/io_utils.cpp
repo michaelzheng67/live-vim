@@ -17,7 +17,7 @@ void adjust_y(int &y, const buffer &buf) {
     y = 0;
 
   int num_lines = buf.get_num_lines();
-  y = std::min(y, num_lines);
+  y = std::min(y, num_lines - 1);
 }
 
 void delete_char_back(std::string &input) { input.erase(input.size() - 1); }

@@ -31,7 +31,7 @@ std::string buffer::get_str_repr() const {
   unsigned int n = data.size();
   for (int i = 0; i < n; i++) {
     res += data[i];
-    if (i < n - 1) {
+    if (i < n - 1 && data[i] != "\n") {
       res += '\n';
     }
   }
@@ -39,26 +39,34 @@ std::string buffer::get_str_repr() const {
 }
 
 void buffer::insert_at(int x, int y, char c) {
-  std::string *str = &data[y];
-  str->insert(x, 1, c);
 
   if (c == '\n') {
-    data.push_back("");
+    data.insert(data.begin() + y, "\n");
+  } else {
+    std::string *str = &data[y];
+    str->insert(x, 1, c);
   }
+  data.shrink_to_fit();
 }
 
 void buffer::delete_at(int x, int y) {
   std::string *str = &data[y];
 
-  if (str->size() > 1) {
-    str->erase(x, 1);
-  } else {
+  if (x <= 0) {
 
     // shift over lines if the current one is to be deleted
-    for (int i = y; i < data.size() - 1; i++) {
-      data[i] = data[i + 1];
+    if (y > 0) {
+      data[y - 1] = data[y - 1] + data[y];
+
+      for (int i = y + 1; i < data.size() - 1; i++) {
+        data[i] = data[i + 1];
+      }
+
+      data.pop_back();
+      data.shrink_to_fit();
     }
-    data.resize(data.size() - 1);
+  } else if (str->size() > 0) {
+    str->erase(x, 1);
   }
 }
 
