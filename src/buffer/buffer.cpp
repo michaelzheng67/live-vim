@@ -39,11 +39,15 @@ std::string buffer::get_str_repr() const {
 }
 
 void buffer::insert_at(int x, int y, char c) {
+  std::string *str = &data[y];
 
+  // split current line into two
   if (c == '\n') {
-    data.insert(data.begin() + y, "\0");
+    std::string first = str->substr(0, x);
+    std::string second = str->substr(x);
+    *str = first;
+    data.insert(data.begin() + y + 1, second);
   } else {
-    std::string *str = &data[y];
     str->insert(x, 1, c);
   }
   data.shrink_to_fit();
