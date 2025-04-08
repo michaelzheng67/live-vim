@@ -56,9 +56,13 @@ void buffer::delete_at(int x, int y) {
 
     // shift over lines if the current one is to be deleted
     if (y > 0) {
-      data[y - 1] = data[y - 1] + data[y];
 
-      for (int i = y + 1; i < data.size() - 1; i++) {
+      // only append to last line if there's actual content
+      if (data[y] != "\n") {
+        data[y - 1] = data[y - 1] + data[y];
+      }
+
+      for (int i = y; i < data.size() - 1; i++) {
         data[i] = data[i + 1];
       }
 
