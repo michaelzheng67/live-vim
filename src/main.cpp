@@ -2,6 +2,7 @@
 #include <iostream>
 #include <string>
 #include <thread>
+#include <tuple>
 #include <vector>
 
 #include <boost/interprocess/ipc/message_queue.hpp>
@@ -142,8 +143,7 @@ void terminal_gui_loop(message_queue &send_q, message_queue &receive_q) {
       switch (c) {
       case BACKSPACE:
         if (modes[INSERT_MODE]) {
-          x--;
-          BUF.delete_at(x, y);
+          std::tie(x, y) = BUF.delete_at(x, y);
           send_delete_command(send_q, x, y);
         } else {
           queued_cmd.pop_back();
@@ -164,10 +164,8 @@ void terminal_gui_loop(message_queue &send_q, message_queue &receive_q) {
         break;
       case '\n':
         if (modes[INSERT_MODE]) {
-          BUF.insert_at(x, y, c);
+          std::tie(x, y) = BUF.insert_at(x, y, c);
           send_insert_command(send_q, x, y, c);
-          y++;
-          x = 0;
         }
 
         if (!mode_toggled(modes)) {
@@ -179,9 +177,8 @@ void terminal_gui_loop(message_queue &send_q, message_queue &receive_q) {
         break;
       default:
         if (modes[INSERT_MODE]) {
-          BUF.insert_at(x, y, c);
+          std::tie(x, y) = BUF.insert_at(x, y, c);
           send_insert_command(send_q, x, y, c);
-          x++;
         } else {
           queued_cmd.push_back(c);
 

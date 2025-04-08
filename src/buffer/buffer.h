@@ -3,6 +3,7 @@
 
 #include <sstream>
 #include <string>
+#include <tuple>
 #include <vector>
 
 // holds contents of the file being worked on
@@ -14,9 +15,9 @@ public:
 
   std::string get_str_repr() const;
 
-  void insert_at(int x, int y, char c);
+  std::tuple<int, int> insert_at(int x, int y, char c);
 
-  void delete_at(int x, int y);
+  std::tuple<int, int> delete_at(int x, int y);
 
   const std::string &get_line_at(int y) const;
 

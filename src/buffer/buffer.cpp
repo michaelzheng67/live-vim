@@ -38,7 +38,7 @@ std::string buffer::get_str_repr() const {
   return res;
 }
 
-void buffer::insert_at(int x, int y, char c) {
+std::tuple<int, int> buffer::insert_at(int x, int y, char c) {
   std::string *str = &data[y];
 
   // split current line into two
@@ -47,13 +47,19 @@ void buffer::insert_at(int x, int y, char c) {
     std::string second = str->substr(x);
     *str = first;
     data.insert(data.begin() + y + 1, second);
+    y++;
+    x = 0;
   } else {
     str->insert(x, 1, c);
+    x++;
   }
   data.shrink_to_fit();
+  return std::tuple<int, int>{x, y};
 }
 
-void buffer::delete_at(int x, int y) {
+std::tuple<int, int> buffer::delete_at(int x, int y) {
+
+  x--;
   std::string *str = &data[y];
 
   if (x <= 0) {
@@ -61,6 +67,7 @@ void buffer::delete_at(int x, int y) {
     // shift over lines if the current one is to be deleted
     if (y > 0) {
 
+      x = data[y - 1].length();
       data[y - 1] = data[y - 1] + data[y];
 
       for (int i = y; i < data.size() - 1; i++) {
@@ -69,10 +76,12 @@ void buffer::delete_at(int x, int y) {
 
       data.pop_back();
       data.shrink_to_fit();
+      y--;
     }
   } else if (str->size() > 0) {
     str->erase(x, 1);
   }
+  return std::tuple<int, int>{x, y};
 }
 
 const std::string &buffer::get_line_at(int y) const { return data[y]; }
