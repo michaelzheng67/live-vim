@@ -36,8 +36,9 @@ boost 1.87 or greater
 ncurses 6.5 or greater
 cmake 3.31.4 or greater
 
-`// clone this repo first  
-cd live-vim  
-make // builds the live-vim binary  
-make test // runs unit tests (gtest)  
-`
+```
+// clone this repo first
+cd live-vim
+make // builds the live-vim binary
+make test // runs unit tests (gtest)
+```
