@@ -62,7 +62,7 @@ std::tuple<int, int> buffer::delete_at(int x, int y) {
   x--;
   std::string *str = &data[y];
 
-  if (x <= 0) {
+  if (x < 0) {
 
     // shift over lines if the current one is to be deleted
     if (y > 0) {
