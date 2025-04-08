@@ -143,8 +143,8 @@ void terminal_gui_loop(message_queue &send_q, message_queue &receive_q) {
       switch (c) {
       case BACKSPACE:
         if (modes[INSERT_MODE]) {
-          std::tie(x, y) = BUF.delete_at(x, y);
           send_delete_command(send_q, x, y);
+          std::tie(x, y) = BUF.delete_at(x, y);
         } else {
           queued_cmd.pop_back();
         }
@@ -164,8 +164,8 @@ void terminal_gui_loop(message_queue &send_q, message_queue &receive_q) {
         break;
       case '\n':
         if (modes[INSERT_MODE]) {
-          std::tie(x, y) = BUF.insert_at(x, y, c);
           send_insert_command(send_q, x, y, c);
+          std::tie(x, y) = BUF.insert_at(x, y, c);
         }
 
         if (!mode_toggled(modes)) {
@@ -177,8 +177,8 @@ void terminal_gui_loop(message_queue &send_q, message_queue &receive_q) {
         break;
       default:
         if (modes[INSERT_MODE]) {
-          std::tie(x, y) = BUF.insert_at(x, y, c);
           send_insert_command(send_q, x, y, c);
+          std::tie(x, y) = BUF.insert_at(x, y, c);
         } else {
           queued_cmd.push_back(c);
 
@@ -250,7 +250,6 @@ int main(int argc, char *argv[]) {
   // child process
   if (pid == 0) {
     if (IS_SERVER) {
-      print("server");
       server_loop(send_q, receive_q);
     } else {
       try {
