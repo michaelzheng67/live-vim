@@ -31,7 +31,7 @@ std::string buffer::get_str_repr() const {
   unsigned int n = data.size();
   for (int i = 0; i < n; i++) {
     res += data[i];
-    if (i < n - 1 && data[i] != "\n") {
+    if (i < n - 1) {
       res += '\n';
     }
   }
@@ -41,7 +41,7 @@ std::string buffer::get_str_repr() const {
 void buffer::insert_at(int x, int y, char c) {
 
   if (c == '\n') {
-    data.insert(data.begin() + y, "\n");
+    data.insert(data.begin() + y, "\0");
   } else {
     std::string *str = &data[y];
     str->insert(x, 1, c);
@@ -57,10 +57,7 @@ void buffer::delete_at(int x, int y) {
     // shift over lines if the current one is to be deleted
     if (y > 0) {
 
-      // only append to last line if there's actual content
-      if (data[y] != "\n") {
-        data[y - 1] = data[y - 1] + data[y];
-      }
+      data[y - 1] = data[y - 1] + data[y];
 
       for (int i = y; i < data.size() - 1; i++) {
         data[i] = data[i + 1];
