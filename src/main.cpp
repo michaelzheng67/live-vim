@@ -35,9 +35,9 @@ void send_shutdown_command(message_queue &send_q) {
 }
 
 // indexes into modes vector
-typedef enum { QUIT_MODE, INSERT_MODE } MODE;
+typedef enum { QUIT_MODE, INSERT_MODE, SAVE_MODE } MODE;
 
-std::vector<bool> modes{false, false};
+std::vector<bool> modes{false, false, false};
 
 bool quit_mode(std::vector<bool> &modes, char f, char s) {
   for (int i = 0; i < modes.size(); i++) {
@@ -61,8 +61,13 @@ void eval_command(std::string &vec) {
 
   if (vec.size() == 2 && vec[0] == ':' && vec[1] == 'q') {
     modes[QUIT_MODE] = true;
-    vec.clear();
   }
+
+  if (vec.size() == 3 && vec[0] == ':' && vec[1] == 'w' && vec[2] == 'q') {
+    modes[SAVE_MODE] = true;
+  }
+
+  vec.clear();
 }
 
 void eval_insert_command(std::string &vec) {
@@ -204,7 +209,7 @@ void terminal_gui_loop(message_queue &send_q, message_queue &receive_q) {
         break;
       }
 
-      if (modes[QUIT_MODE]) {
+      if (modes[QUIT_MODE] || modes[SAVE_MODE]) {
         goto exit;
       }
 
@@ -218,7 +223,10 @@ void terminal_gui_loop(message_queue &send_q, message_queue &receive_q) {
 exit:
 
   endwin();
-  write_out_buf(PATH, BUF.get_str_repr());
+
+  if (modes[SAVE_MODE]) {
+    write_out_buf(PATH, BUF.get_str_repr());
+  }
 
   // invariant: network process always checks send queue for shutdown command
   send_shutdown_command(send_q);
