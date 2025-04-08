@@ -35,7 +35,7 @@ void send_shutdown_command(message_queue &send_q) {
 }
 
 // indexes into modes vector
-typedef enum { QUIT_MODE, INSERT_MODE, SAVE_MODE } MODE;
+typedef enum { INVALID_MODE, QUIT_MODE, INSERT_MODE, SAVE_MODE } MODE;
 
 std::vector<bool> modes{false, false, false};
 
@@ -61,13 +61,17 @@ void eval_command(std::string &vec) {
 
   if (vec.size() == 2 && vec[0] == ':' && vec[1] == 'q') {
     modes[QUIT_MODE] = true;
+    vec.clear();
   }
 
-  if (vec.size() == 3 && vec[0] == ':' && vec[1] == 'w' && vec[2] == 'q') {
+  else if (vec.size() == 3 && vec[0] == ':' && vec[1] == 'w' && vec[2] == 'q') {
     modes[SAVE_MODE] = true;
+    vec.clear();
   }
 
-  vec.clear();
+  else {
+    modes[INVALID_MODE] = true;
+  }
 }
 
 void eval_insert_command(std::string &vec) {
@@ -92,7 +96,7 @@ bool mode_toggled(std::vector<bool> &vec) {
   return false;
 }
 
-void print_screen(int x, int y, const std::string &queued_cmd) {
+void print_screen(int x, int y, std::string &queued_cmd) {
   int rows, cols;
   getmaxyx(stdscr, rows, cols);
 
@@ -101,6 +105,16 @@ void print_screen(int x, int y, const std::string &queued_cmd) {
 
   if (modes[INSERT_MODE]) {
     mvprintw(rows - 1, 0, "-- Insert --");
+  }
+
+  if (modes[INVALID_MODE]) {
+    attron(COLOR_PAIR(1));
+    mvprintw(rows - 1, 0, "Not an editor command: %s",
+             queued_cmd.substr(1).c_str());
+    attroff(COLOR_PAIR(1));
+
+    queued_cmd.clear();
+    modes[INVALID_MODE] = false;
   }
 
   if (!mode_toggled(modes)) {
@@ -115,7 +129,11 @@ void print_screen(int x, int y, const std::string &queued_cmd) {
 }
 
 void terminal_gui_loop(message_queue &send_q, message_queue &receive_q) {
-  initscr(); // Start curses mode
+  initscr();
+  start_color();
+  use_default_colors();
+  init_pair(1, -1, COLOR_RED);
+
   noecho();
   nodelay(stdscr, TRUE);
   keypad(stdscr, TRUE);
