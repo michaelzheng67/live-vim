@@ -5,6 +5,7 @@
 
 extern std::string PATH;
 extern char *SERVER_IP;
+extern int SERVER_PORT;
 extern bool IS_SERVER;
 
 // parses user input and stores them in global variables

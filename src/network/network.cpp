@@ -1,4 +1,5 @@
 #include "network.h"
+#include "../util/utils.h"
 
 #include <arpa/inet.h>
 #include <netinet/in.h>
@@ -102,7 +103,7 @@ exit:
 void server_loop(message_queue &send_q, message_queue &receive_q) {
 
   auto ioc = std::make_shared<net::io_context>();
-  tcp::acceptor acceptor(*ioc, tcp::endpoint(tcp::v4(), 9002));
+  tcp::acceptor acceptor(*ioc, tcp::endpoint(tcp::v4(), SERVER_PORT));
 
   std::atomic<bool> stop_server = false;
   while (!stop_server) {
@@ -128,9 +129,9 @@ void client_loop(const char *server_ip, message_queue &send_q,
   net::io_context ioc;
   tcp::resolver resolver{ioc};
   websocket::stream<tcp::socket> ws{ioc};
-  auto const results = resolver.resolve("127.0.0.1", "9002");
+  auto const results = resolver.resolve(SERVER_IP, std::to_string(SERVER_PORT));
   net::connect(ws.next_layer(), results);
-  ws.handshake("127.0.0.1", "/");
+  ws.handshake(SERVER_IP, "/");
 
   // async fetches packets from peer in background
   std::function<void(message_queue &, websocket::stream<tcp::socket> &)>
