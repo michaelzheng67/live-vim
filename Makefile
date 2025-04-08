@@ -10,6 +10,11 @@ BOOST_INCLUDE = -I/opt/homebrew/include
 BOOST_LDFLAGS = -L/opt/homebrew/lib
 BOOST_LIBS = -lboost_system -lboost_thread
 
+# GTest flags
+GTEST_INCLUDE = -I/opt/homebrew/include
+GTEST_LDFLAGS = -L/opt/homebrew/lib
+GTEST_LIBS = -lgtest -lgtest_main
+
 # Linker flags
 LDFLAGS = -lncurses $(BOOST_LIBS) $(BOOST_LDFLAGS)
 
@@ -19,12 +24,18 @@ OBJ_DIR = build/obj
 BIN_DIR = build
 TARGET = $(BIN_DIR)/live-vim
 
-# Recursive wildcard function to get all .cpp files in src and subdirectories
+TEST_DIR = test
+TEST_OBJ_DIR = build/test_obj
+TEST_BIN = $(BIN_DIR)/test-runner
+
+# Source and object files
 rwildcard = $(foreach d,$(wildcard $1*),$(call rwildcard,$d/,$2) $(filter $(subst *,%,$2),$d))
 SRCS = $(call rwildcard, $(SRC_DIR)/, *.cpp)
-
-# Convert source paths to object paths (src/foo/bar.cpp -> build/obj/foo/bar.o)
 OBJS = $(patsubst $(SRC_DIR)/%.cpp, $(OBJ_DIR)/%.o, $(SRCS))
+OBJS_WITHOUT_MAIN = $(filter-out $(OBJ_DIR)/main.o, $(OBJS))
+
+TEST_SRCS = $(shell find $(TEST_DIR) -name '*.cpp')
+TEST_OBJS = $(patsubst $(TEST_DIR)/%, $(TEST_OBJ_DIR)/%, $(TEST_SRCS:.cpp=.o))
 
 # Default target
 all: $(TARGET)
@@ -34,13 +45,27 @@ $(TARGET): $(OBJS)
 	@mkdir -p $(BIN_DIR)
 	$(CXX) $(CXXFLAGS) -o $@ $^ $(LDFLAGS)
 
-# Compile each .cpp into corresponding .o file under build/obj
+# Compile source files
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
 	@mkdir -p $(dir $@)
 	$(CXX) $(CXXFLAGS) $(BOOST_INCLUDE) -c $< -o $@
 
-# Clean target
-clean:
-	rm -rf $(OBJ_DIR) $(BIN_DIR)/live-vim
+# Compile test files (recursively)
+$(TEST_OBJ_DIR)/%.o: $(TEST_DIR)/%.cpp
+	@mkdir -p $(dir $@)
+	$(CXX) $(CXXFLAGS) $(BOOST_INCLUDE) $(GTEST_INCLUDE) -c $< -o $@
 
-.PHONY: all clean
+# Test build and run
+test:
+	$(MAKE) --always-make $(TEST_BIN)
+	@./$(TEST_BIN) --gtest_color=yes
+
+$(TEST_BIN): $(TEST_OBJS) $(OBJS_WITHOUT_MAIN)
+	@mkdir -p $(BIN_DIR)
+	$(CXX) $(CXXFLAGS) -o $@ $^ $(LDFLAGS) $(GTEST_LDFLAGS) $(GTEST_LIBS)
+
+# Clean
+clean:
+	rm -rf $(OBJ_DIR) $(TEST_OBJ_DIR) $(BIN_DIR)/live-vim $(TEST_BIN)
+
+.PHONY: all clean test

@@ -13,7 +13,7 @@
 void adjust_x(int &x, const buffer &buf, const int y);
 void adjust_y(int &y, const buffer &buffer);
 
-// Given a fstream, we delete the last character of
+// Given a string, we delete the last character of
 // the file.
 void delete_char_back(std::string &input);
 
