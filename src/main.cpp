@@ -87,6 +87,28 @@ bool mode_toggled(std::vector<bool> &vec) {
   return false;
 }
 
+void print_screen(int x, int y, const std::string &queued_cmd) {
+  int rows, cols;
+  getmaxyx(stdscr, rows, cols);
+
+  clear();
+  printw(BUF.get_str_repr().c_str());
+
+  if (modes[INSERT_MODE]) {
+    mvprintw(rows - 1, 0, "-- Insert --");
+  }
+
+  if (!mode_toggled(modes)) {
+    mvprintw(rows - 1, 0, queued_cmd.c_str());
+  }
+
+  std::string coordinates = std::to_string(y) + "," + std::to_string(x);
+  mvprintw(rows - 1, cols - coordinates.size(), "%s", coordinates.c_str());
+
+  move(y, x);
+  refresh();
+}
+
 void terminal_gui_loop(message_queue &send_q, message_queue &receive_q) {
   initscr(); // Start curses mode
   noecho();
@@ -119,17 +141,11 @@ void terminal_gui_loop(message_queue &send_q, message_queue &receive_q) {
       switch (packet.operation) {
       case INSERT:
         BUF.insert_at(packet.x, packet.y, packet.c);
-        clear();
-        printw(BUF.get_str_repr().c_str());
-        move(y, x);
-        refresh();
+        print_screen(x, y, queued_cmd);
         break;
       case DELETE:
         BUF.delete_at(packet.x, packet.y);
-        clear();
-        printw(BUF.get_str_repr().c_str());
-        move(y, x);
-        refresh();
+        print_screen(x, y, queued_cmd);
         break;
       case SHUTDOWN:
         goto exit;
@@ -195,25 +211,7 @@ void terminal_gui_loop(message_queue &send_q, message_queue &receive_q) {
       adjust_x(x, BUF, y);
       adjust_y(y, BUF);
 
-      clear();
-      printw(BUF.get_str_repr().c_str());
-
-      int rows, cols;
-      getmaxyx(stdscr, rows, cols);
-
-      if (modes[INSERT_MODE]) {
-        mvprintw(rows - 1, 0, "-- Insert --");
-      }
-
-      if (!mode_toggled(modes)) {
-        mvprintw(rows - 1, 0, queued_cmd.c_str());
-      }
-
-      std::string coordinates = std::to_string(y) + "," + std::to_string(x);
-      mvprintw(rows - 1, cols - coordinates.size(), "%s", coordinates.c_str());
-
-      move(y, x);
-      refresh();
+      print_screen(x, y, queued_cmd);
     }
   }
 
