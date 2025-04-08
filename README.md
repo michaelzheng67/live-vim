@@ -6,10 +6,10 @@ Live Vim is a collaborative, terminal-based editor that brings the power of Vim 
 
 ## Features 📝
 
-🧑‍💻 Vim-style Editing: Built around familiar normal, insert, and visual modes.
-🔁 Real-Time Sync: Edits are synchronized across all connected users instantly.
-🌐 Client-Server Model: One user runs the server, others connect as clients through websockets.
-📦 Minimal Dependencies: Pure C++ with Boost and ncurses; no frameworks here.
+🧑‍💻 Vim-style Editing: Built around familiar normal, insert, and visual modes.  
+🔁 Real-Time Sync: Edits are synchronized across all connected users instantly.  
+🌐 Client-Server Model: One user runs the server, others connect as clients through websockets.  
+📦 Minimal Dependencies: Pure C++ with Boost and ncurses; no frameworks here.  
 📄 File Loading & Saving: Open local files and write back changes collaboratively.
 
 ## Collaboration Flow 👥
@@ -36,8 +36,8 @@ boost 1.87 or greater
 ncurses 6.5 or greater
 cmake 3.31.4 or greater
 
-`// clone this repo first
-cd live-vim
-make // builds the live-vim binary
-make test // runs unit tests (gtest)
+`// clone this repo first  
+cd live-vim  
+make // builds the live-vim binary  
+make test // runs unit tests (gtest)  
 `
