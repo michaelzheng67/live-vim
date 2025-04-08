@@ -12,6 +12,10 @@ Live Vim is a collaborative, terminal-based editor that brings the power of Vim 
 📦 Minimal Dependencies: Pure C++ with Boost and ncurses; no frameworks here.  
 📄 File Loading & Saving: Open local files and write back changes collaboratively.
 
+## Demo
+https://github.com/user-attachments/assets/7873f2e1-6c36-4c29-a7b5-5d4b4c109b5d
+
+
 ## Collaboration Flow 👥
 
 1. One user runs the server with a file path.
