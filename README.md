@@ -13,8 +13,8 @@ Live Vim is a collaborative, terminal-based editor that brings the power of Vim 
 📄 File Loading & Saving: Open local files and write back changes collaboratively.
 
 ## Demo
-https://github.com/user-attachments/assets/7873f2e1-6c36-4c29-a7b5-5d4b4c109b5d
 
+https://github.com/user-attachments/assets/7873f2e1-6c36-4c29-a7b5-5d4b4c109b5d
 
 ## Collaboration Flow 👥
 
@@ -35,9 +35,9 @@ The main reason for this design is that as of today, ncurses is not thread-safe.
 
 ### Requirements
 
-C++17 or greater
-boost 1.87 or greater
-ncurses 6.5 or greater
+C++17 or greater  
+boost 1.87 or greater  
+ncurses 6.5 or greater  
 cmake 3.31.4 or greater
 
 ```
