@@ -258,7 +258,14 @@ int main(int argc, char **argv) {
   argv = app.ensure_utf8(argv);
 
   std::string file_path = "default";
-  app.add_option("-f,--file", file_path, "Path to file you want to edit");
+  auto file_path_flag =
+      app.add_option("-f,--file", file_path, "Path to file you want to edit");
+
+  auto file_path_positional =
+      app.add_option("pos_file", file_path, "Path to file you want to edit");
+
+  file_path_flag->excludes(file_path_positional);
+  file_path_positional->excludes(file_path_flag);
 
   std::string server_ip = "127.0.0.1";
   app.add_option("--server_ip", server_ip, "Server IP to connect to");
