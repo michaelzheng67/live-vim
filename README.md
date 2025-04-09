@@ -18,9 +18,9 @@ https://github.com/user-attachments/assets/7873f2e1-6c36-4c29-a7b5-5d4b4c109b5d
 
 ## Collaboration Flow 👥
 
-1. One user runs the server with a file path.
-2. Others connect using the same binary with the server IP as second arg.
-3. That's it! All clients see changes in real-time, like magic ✨
+1. One user runs the server process opened up to a specific file they wish to edit
+2. Others connect to the server process by indicating server IP and port, while also making sure they open the same file
+3. That's it! Everyone can edit and see changes in real-time, like magic ✨
 
 ## Architecture
 
@@ -30,6 +30,15 @@ There are two processes that run when you spin up live vim:
 - child process managing websocket connection
 
 The main reason for this design is that as of today, ncurses is not thread-safe. Thus, we opt for a multi-process approach to separate concerns and ensure that neither terminal or network ops block each other.
+
+Packets are sent over the wire with a specific structure. Currently, there are two highlighted actions you can take: insertion and deletion. These operations are sent
+on each edit and applied to the local copies of the file for each user. Given we are using a websocket connnection with TCP as the underlying network layer, we can
+ensure that changes will reach each client at least once due to re-transmissions. Furthermore, websockets are a more "intuitive" fit for two-way communication as
+opposed to a request - response based model, and don't require new connections on each transmission (older versions of http) and lower header overhead.
+
+File content is essentially represented as a vector of strings, indexed by the row they belong to. This helps wit write contention compared to a naive buffer
+implementation, as edits on two separate rows will not affect each other, and the only contention is per line. On each edit to file content, the vector is shrunk to use
+only the necessary memory to hold exactly the rows of content present, thus reducing memory footprint.
 
 ## Getting Started 🧪
 
