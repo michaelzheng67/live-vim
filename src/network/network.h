@@ -15,8 +15,9 @@ struct packet {
   char c;
 };
 
-void server_loop(message_queue &send_q, message_queue &receive_q);
-void client_loop(const char *server_ip, message_queue &send_q,
+void server_loop(const unsigned int server_port, message_queue &send_q,
                  message_queue &receive_q);
+void client_loop(const char *server_ip, const unsigned int server_port,
+                 message_queue &send_q, message_queue &receive_q);
 
 #endif

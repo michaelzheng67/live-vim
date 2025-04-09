@@ -1,5 +1,4 @@
 #include "network.h"
-#include "../util/utils.h"
 
 #include <arpa/inet.h>
 #include <netinet/in.h>
@@ -100,10 +99,11 @@ exit:
   stop_server = true;
 }
 
-void server_loop(message_queue &send_q, message_queue &receive_q) {
+void server_loop(const unsigned int server_port, message_queue &send_q,
+                 message_queue &receive_q) {
 
   auto ioc = std::make_shared<net::io_context>();
-  tcp::acceptor acceptor(*ioc, tcp::endpoint(tcp::v4(), SERVER_PORT));
+  tcp::acceptor acceptor(*ioc, tcp::endpoint(tcp::v4(), server_port));
 
   std::atomic<bool> stop_server = false;
   while (!stop_server) {
@@ -116,8 +116,8 @@ void server_loop(message_queue &send_q, message_queue &receive_q) {
   ioc->stop();
 }
 
-void client_loop(const char *server_ip, message_queue &send_q,
-                 message_queue &receive_q) {
+void client_loop(const char *server_ip, const unsigned int server_port,
+                 message_queue &send_q, message_queue &receive_q) {
 
 #ifdef DEBUG
   std::ofstream ofile("./data/output.txt", std::ios::app);
@@ -129,9 +129,9 @@ void client_loop(const char *server_ip, message_queue &send_q,
   net::io_context ioc;
   tcp::resolver resolver{ioc};
   websocket::stream<tcp::socket> ws{ioc};
-  auto const results = resolver.resolve(SERVER_IP, std::to_string(SERVER_PORT));
+  auto const results = resolver.resolve(server_ip, std::to_string(server_port));
   net::connect(ws.next_layer(), results);
-  ws.handshake(SERVER_IP, "/");
+  ws.handshake(server_ip, "/");
 
   // async fetches packets from peer in background
   std::function<void(message_queue &, websocket::stream<tcp::socket> &)>

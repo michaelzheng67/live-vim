@@ -9,10 +9,10 @@
 #include <ncurses.h>
 #include <unistd.h>
 
+#include "argparse/CLI11.hpp"
 #include "buffer/buffer.h"
 #include "io/io_utils.h"
 #include "network/network.h"
-#include "util/utils.h"
 
 using namespace boost::interprocess;
 
@@ -128,7 +128,8 @@ void print_screen(int x, int y, std::string &queued_cmd) {
   refresh();
 }
 
-void terminal_gui_loop(message_queue &send_q, message_queue &receive_q) {
+void terminal_gui_loop(const char *file_path, message_queue &send_q,
+                       message_queue &receive_q) {
   initscr();
   start_color();
   use_default_colors();
@@ -138,7 +139,7 @@ void terminal_gui_loop(message_queue &send_q, message_queue &receive_q) {
   nodelay(stdscr, TRUE);
   keypad(stdscr, TRUE);
 
-  create_buf(PATH);
+  create_buf(file_path);
 
   printw(BUF.get_str_repr().c_str());
 
@@ -243,20 +244,32 @@ exit:
   endwin();
 
   if (modes[SAVE_MODE]) {
-    write_out_buf(PATH, BUF.get_str_repr());
+    write_out_buf(file_path, BUF.get_str_repr());
   }
 
   // invariant: network process always checks send queue for shutdown command
   send_shutdown_command(send_q);
 }
 
-int main(int argc, char *argv[]) {
+int main(int argc, char **argv) {
 
   // parse user arguments
-  bool res = parse_init(argc, argv);
-  if (!res) {
-    return 0;
-  }
+  CLI::App app{"Vim with your friends 📝"};
+  argv = app.ensure_utf8(argv);
+
+  std::string file_path = "default";
+  app.add_option("-f,--file", file_path, "Path to file you want to edit");
+
+  std::string server_ip = "127.0.0.1";
+  app.add_option("--server_ip", server_ip, "Server IP to connect to");
+
+  int server_port = 8002;
+  app.add_option("--server_port", server_port, "Server port to connect to");
+
+  bool is_server = false;
+  app.add_flag("-s,--server", is_server, "Make this a server process");
+
+  CLI11_PARSE(app, argc, argv);
 
   // sanity check that previous MQs were cleaned up
   message_queue::remove(TO_SEND);
@@ -273,11 +286,11 @@ int main(int argc, char *argv[]) {
 
   // child process
   if (pid == 0) {
-    if (IS_SERVER) {
-      server_loop(send_q, receive_q);
+    if (is_server) {
+      server_loop(server_port, send_q, receive_q);
     } else {
       try {
-        client_loop(SERVER_IP, send_q, receive_q);
+        client_loop(server_ip.c_str(), server_port, send_q, receive_q);
       } catch (std::exception &e) {
 
         // in case network process dies, shut down ncursor process
@@ -289,7 +302,7 @@ int main(int argc, char *argv[]) {
 
     // parent process
   } else {
-    terminal_gui_loop(send_q, receive_q);
+    terminal_gui_loop(file_path.c_str(), send_q, receive_q);
   }
 
   // cleanup
