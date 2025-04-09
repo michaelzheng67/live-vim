@@ -9,7 +9,11 @@ endif
 # Boost flags
 BOOST_INCLUDE = -I/opt/homebrew/include
 BOOST_LDFLAGS = -L/opt/homebrew/lib
-BOOST_LIBS = -lboost_system -lboost_thread
+BOOST_LIBS = -lboost_system -lboost_thread 
+
+ifeq ($(DOCKER), 1)
+BOOST_LIBS += -pthread -lrt
+endif
 
 # GTest flags
 GTEST_INCLUDE = -I/opt/homebrew/include

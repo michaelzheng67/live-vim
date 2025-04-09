@@ -79,3 +79,14 @@ OPTIONS:
   -h,     --help              Print this help message and exit
 ...
 ```
+
+To run a docker image:
+
+```
+docker build -t live-vim-image .
+
+// Then you can run with cli options
+$ docker run -p 8002:8002 live-vim-image ./build/live-vim -h
+Vim with your friends 📝
+...
+```
