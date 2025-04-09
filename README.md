@@ -49,9 +49,33 @@ boost 1.87 or greater
 ncurses 6.5 or greater  
 cmake 3.31.4 or greater
 
+Playing with the source code:
+
 ```
 // clone this repo first
 cd live-vim
 make // builds the live-vim binary
 make test // runs unit tests (gtest)
+```
+
+To compile binary and run in terminal:
+
+```
+chmod +x configure.sh
+./configure.sh // compiles + places binary into usr/local/bin. likely requires sudo
+```
+
+Then you can run live-vim:
+
+```
+(base) MacBook-Pro-4:bin michaelzheng$ live-vim -h
+Vim with your friends 📝
+
+
+live-vim [OPTIONS]
+
+
+OPTIONS:
+  -h,     --help              Print this help message and exit
+...
 ```
