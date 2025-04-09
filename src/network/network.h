@@ -16,8 +16,10 @@ struct packet {
 };
 
 void server_loop(const unsigned int server_port, message_queue &send_q,
-                 message_queue &receive_q);
+                 message_queue &receive_q,
+                 char *debug_file_path = "./data/output.txt");
 void client_loop(const char *server_ip, const unsigned int server_port,
-                 message_queue &send_q, message_queue &receive_q);
+                 message_queue &send_q, message_queue &receive_q,
+                 char *debug_file_path = "./data/output.txt");
 
 #endif

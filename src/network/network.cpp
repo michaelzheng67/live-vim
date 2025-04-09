@@ -24,10 +24,10 @@ using tcp = boost::asio::ip::tcp;
 
 void do_session(tcp::socket socket, message_queue &send_q,
                 message_queue &receive_q, std::atomic<bool> &stop_server,
-                std::shared_ptr<net::io_context> ioc) {
+                std::shared_ptr<net::io_context> ioc, const char *debug_path) {
 
 #ifdef DEBUG
-  std::ofstream ofile("./data/output.txt", std::ios::app);
+  std::ofstream ofile(debug_path, std::ios::app);
 #else
   std::shared_ptr<std::ofstream> ofile = nullptr;
 #endif
@@ -56,6 +56,7 @@ void do_session(tcp::socket socket, message_queue &send_q,
 #ifdef DEBUG
         ofile << "async_read error: " << ec.message() << std::endl;
 #endif
+        return;
       }
     });
   };
@@ -94,33 +95,30 @@ exit:
 #ifdef DEBUG
   ofile.close();
 #endif
-  ws.close(websocket::close_code::normal);
   io_thread.join();
   stop_server = true;
 }
 
 void server_loop(const unsigned int server_port, message_queue &send_q,
-                 message_queue &receive_q) {
+                 message_queue &receive_q, char *debug_file_path) {
 
   auto ioc = std::make_shared<net::io_context>();
   tcp::acceptor acceptor(*ioc, tcp::endpoint(tcp::v4(), server_port));
 
   std::atomic<bool> stop_server = false;
-  while (!stop_server) {
-    tcp::socket socket(*ioc);
-    acceptor.accept(socket);
-    std::thread(&do_session, std::move(socket), std::ref(send_q),
-                std::ref(receive_q), std::ref(stop_server), ioc)
-        .detach();
-  }
+  tcp::socket socket(*ioc);
+  acceptor.accept(socket);
+  do_session(std::move(socket), send_q, receive_q, stop_server, ioc,
+             debug_file_path);
   ioc->stop();
 }
 
 void client_loop(const char *server_ip, const unsigned int server_port,
-                 message_queue &send_q, message_queue &receive_q) {
+                 message_queue &send_q, message_queue &receive_q,
+                 char *debug_file_path) {
 
 #ifdef DEBUG
-  std::ofstream ofile("./data/output.txt", std::ios::app);
+  std::ofstream ofile(debug_file_path, std::ios::app);
 #else
   std::shared_ptr<std::ofstream> ofile = nullptr;
 #endif

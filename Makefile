@@ -2,8 +2,9 @@
 CXX = g++
 CXXFLAGS = -Wall -std=c++17 -O3
 
-# uncomment for debug mode
-# CXXFLAGS += -DDEBUG
+ifeq ($(DEBUG), 1)
+  CXXFLAGS += -DDEBUG
+endif
 
 # Boost flags
 BOOST_INCLUDE = -I/opt/homebrew/include
@@ -57,7 +58,7 @@ $(TEST_OBJ_DIR)/%.o: $(TEST_DIR)/%.cpp
 
 # Test build and run
 test:
-	$(MAKE) --always-make $(TEST_BIN)
+	$(MAKE) --always-make DEBUG=1 $(TEST_BIN)
 	@./$(TEST_BIN) --gtest_color=yes
 
 $(TEST_BIN): $(TEST_OBJS) $(OBJS_WITHOUT_MAIN)
