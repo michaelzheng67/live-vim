@@ -276,8 +276,8 @@ int main(int argc, char **argv) {
   int server_port = 0;
   app.add_option("--server_port", server_port, "Server port to connect to");
 
-  bool is_server = false;
-  app.add_flag("-s,--server", is_server, "Make this a server process");
+  bool is_client = false;
+  app.add_flag("-c,--client", is_client, "Make this a client process");
 
   CLI11_PARSE(app, argc, argv);
 
@@ -296,11 +296,19 @@ int main(int argc, char **argv) {
 
   // child process
   if (pid == 0) {
-    if (is_server) {
-      server_loop(server_port, send_q, receive_q);
-    } else {
+    if (is_client) {
       try {
         client_loop(server_ip.c_str(), server_port, send_q, receive_q);
+      } catch (std::exception &e) {
+
+        // in case network process dies, shut down ncursor process
+        packet shutdown{SHUTDOWN};
+        receive_q.send(&shutdown, sizeof(shutdown), 0);
+        return 0;
+      }
+    } else {
+      try {
+        server_loop(server_port, send_q, receive_q);
       } catch (std::exception &e) {
 
         // in case network process dies, shut down ncursor process
