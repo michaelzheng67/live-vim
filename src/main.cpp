@@ -96,6 +96,8 @@ bool mode_toggled(std::vector<bool> &vec) {
   return false;
 }
 
+int *shared_port;
+
 void print_screen(int x, int y, std::string &queued_cmd) {
   int rows, cols;
   getmaxyx(stdscr, rows, cols);
@@ -122,7 +124,8 @@ void print_screen(int x, int y, std::string &queued_cmd) {
   }
 
   std::string coordinates = std::to_string(y) + "," + std::to_string(x);
-  mvprintw(rows - 1, cols - coordinates.size(), "%s", coordinates.c_str());
+  mvprintw(rows - 1, cols - coordinates.size() - 20, "%s", coordinates.c_str());
+  mvprintw(rows - 1, cols - 10, "port=%u", *shared_port);
 
   move(y, x);
   refresh();
@@ -270,7 +273,7 @@ int main(int argc, char **argv) {
   std::string server_ip = "127.0.0.1";
   app.add_option("--server_ip", server_ip, "Server IP to connect to");
 
-  int server_port = 8002;
+  int server_port = 0;
   app.add_option("--server_port", server_port, "Server port to connect to");
 
   bool is_server = false;
@@ -309,6 +312,19 @@ int main(int argc, char **argv) {
 
     // parent process
   } else {
+
+    // TODO: have a better synchronization scheme than this to ensure that
+    //       network process runs first.
+    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+
+    // shared memory to retrieve assigned port from network process
+    const char *name = "/assigned_port";
+    int shm_fd = shm_open(name, O_RDONLY, 0666);
+    void *ptr = mmap(0, sizeof(int), PROT_READ, MAP_SHARED, shm_fd, 0);
+    shared_port = static_cast<int *>(ptr);
+    close(shm_fd);
+    shm_unlink(name);
+
     terminal_gui_loop(file_path.c_str(), send_q, receive_q);
   }
 

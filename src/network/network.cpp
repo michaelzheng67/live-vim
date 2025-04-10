@@ -105,6 +105,14 @@ void server_loop(const unsigned int server_port, message_queue &send_q,
   auto ioc = std::make_shared<net::io_context>();
   tcp::acceptor acceptor(*ioc, tcp::endpoint(tcp::v4(), server_port));
 
+  // shared memory w/ terminal gui to display port assigned
+  int shm_fd = shm_open("/assigned_port", O_CREAT | O_RDWR, 0666);
+  ftruncate(shm_fd, sizeof(int));
+  void *ptr =
+      mmap(0, sizeof(int), PROT_READ | PROT_WRITE, MAP_SHARED, shm_fd, 0);
+  int *shared_port = static_cast<int *>(ptr);
+  *shared_port = acceptor.local_endpoint().port();
+
   std::atomic<bool> stop_server = false;
   tcp::socket socket(*ioc);
   acceptor.accept(socket);
@@ -130,6 +138,14 @@ void client_loop(const char *server_ip, const unsigned int server_port,
   auto const results = resolver.resolve(server_ip, std::to_string(server_port));
   net::connect(ws.next_layer(), results);
   ws.handshake(server_ip, "/");
+
+  // shared memory w/ terminal gui to display port assigned
+  int shm_fd = shm_open("/assigned_port", O_CREAT | O_RDWR, 0666);
+  ftruncate(shm_fd, sizeof(int));
+  void *ptr =
+      mmap(0, sizeof(int), PROT_READ | PROT_WRITE, MAP_SHARED, shm_fd, 0);
+  int *shared_port = static_cast<int *>(ptr);
+  *shared_port = ws.next_layer().local_endpoint().port();
 
   // async fetches packets from peer in background
   std::function<void(message_queue &, websocket::stream<tcp::socket> &)>
